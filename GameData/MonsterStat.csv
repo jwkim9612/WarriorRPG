@@ -1,0 +1,11 @@
+﻿Name,MaxHP,Attack,DropExp
+Minion_Melee,50,5,10
+Minion_Lane_Melee_Core_Dawn,100,10,15
+Minion_Lane_Melee_Dawn,150,20,20
+Minion_Lane_Super_Core_Dawn,500,30,25
+BlackMinion,150,10,30
+BlackMinion1,150,10,35
+BlackMinion2,150,10,40
+BlackMinion3,150,10,45
+BlackMinion4,150,10,50
+BlackMinion5,150,10,55
