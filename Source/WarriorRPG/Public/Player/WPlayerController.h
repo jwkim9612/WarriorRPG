@@ -19,10 +19,19 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* aPawn) override;
 
 public:
 	void MonsterKill(class AWMonster* KilledMonster);
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UWPlayerHUDWidget> WPlayerHUDWidgetClass;
+
 private:
+	UPROPERTY()
 	class AWPlayerState* WPlayerState;
+
+	UPROPERTY()
+	class UWPlayerHUDWidget* WPlayerHUDWidget;
 };

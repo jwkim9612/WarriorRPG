@@ -5,10 +5,17 @@
 #include "WPlayerState.h"
 #include "WMonster.h"
 #include "WMonsterStatComponent.h"
+#include "WPlayerHUDWidget.h"
 
 AWPlayerController::AWPlayerController()
 {
+	static ConstructorHelpers::FClassFinder<UWPlayerHUDWidget>
+		UI_HUD_C(TEXT("WidgetBlueprint'/Game/Book/Player/Widget/HUDWidget.HUDWidget_C'"));
 
+	if (UI_HUD_C.Succeeded())
+	{
+		WPlayerHUDWidgetClass = UI_HUD_C.Class;
+	}
 }
 
 void AWPlayerController::BeginPlay()
@@ -19,6 +26,14 @@ void AWPlayerController::BeginPlay()
 	SetInputMode(InputMode);
 
 	WPlayerState = Cast<AWPlayerState>(PlayerState);
+}
+
+void AWPlayerController::OnPossess(APawn* aPawn)
+{
+	Super::OnPossess(aPawn);
+
+	WPlayerHUDWidget = CreateWidget<UWPlayerHUDWidget>(this, WPlayerHUDWidgetClass);
+	WPlayerHUDWidget->AddToViewport();
 }
 
 void AWPlayerController::MonsterKill(AWMonster * KilledMonster)
