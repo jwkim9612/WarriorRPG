@@ -19,7 +19,10 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 
-private:
+public:
 	UPROPERTY()
 	class UProgressBar* HPBar;
+
+	UPROPERTY()
+	class UTextBlock* HPText;
 };

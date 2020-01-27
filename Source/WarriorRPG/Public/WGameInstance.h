@@ -21,7 +21,7 @@ struct FWPlayerData : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	FWPlayerData() : Level(1), Attack(10), MaxHP(100.0f), NextExp(30.0f) { }
+	FWPlayerData() : Level(1), Attack(10), MaxHP(100.0f), MaxMP(10.0f), NextExp(30.0f) { }
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	int32 Level;
@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float MaxHP;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float MaxMP;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 	float NextExp;
 };

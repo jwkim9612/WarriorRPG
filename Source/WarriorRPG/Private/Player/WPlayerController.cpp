@@ -26,6 +26,8 @@ void AWPlayerController::BeginPlay()
 	SetInputMode(InputMode);
 
 	WPlayerState = Cast<AWPlayerState>(PlayerState);
+	WRPGCHECK(WPlayerState);
+	WPlayerHUDWidget->BindPlayerState(WPlayerState);
 }
 
 void AWPlayerController::OnPossess(APawn* aPawn)

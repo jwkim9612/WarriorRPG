@@ -6,6 +6,10 @@
 #include "GameFramework/PlayerState.h"
 #include "WPlayerState.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnHPChangedDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnMPChangedDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnExpChangedDelegate);
+
 // PlayerState 는 네트워크 게임에서 매우 유용한 클래스이다. 
 // 이름에서 그 용도를 짐작할 수 있듯이 게임 플레이어의 모든 상태를 저장하고 다른 클라이언트에게 까지 전달할 수 있는 특징을 가지고 있다
 
@@ -40,6 +44,9 @@ private:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
 	float CurrentHP;
 
+	UPROPERTY(Transient, VisibleInstanceOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
+	float CurrentMP;
+
 public:
 	int32 GetAttack() const;
 
@@ -49,4 +56,15 @@ public:
 	void SetHPToDamage(float Damage);
 	void AddExp(float IncomeExp);
 	bool IsMaxLevel() const;
+	float GetLevel() const;
+	float GetCurrentHP() const;
+	float GetCurrentMP() const;
+	float GetHPRatio() const;
+	float GetMPRatio() const;
+	float GetExpRatio() const;
+	struct FWPlayerData* GetCurrentStateData() const;
+
+	FOnHPChangedDelegate OnHPChanged;
+	FOnMPChangedDelegate OnMPChanged;
+	FOnExpChangedDelegate OnExpChanged;
 };
