@@ -3,9 +3,12 @@
 
 #include "WMonster.h"
 #include "WMonsterAnimInstance.h"
-#include "WAIController.h"
 #include "WMonsterStatComponent.h"
+#include "WMonsterHPWidget.h"
+#include "WAIController.h"
 #include "WPlayerController.h"
+#include "Components/WidgetComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 AWMonster::AWMonster()
@@ -31,7 +34,33 @@ AWMonster::AWMonster()
 
 	CurrentStat = CreateDefaultSubobject<UWMonsterStatComponent>(TEXT("MonsterStat"));
 	
+	//////////////// 몬스터 체력바 위젯 ///////////////
+	HPWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPWIDGET"));
+	HPWidget->SetupAttachment(GetMesh());
+	HPWidget->SetRelativeLocation(FVector(0.0f, 0.0f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 2));
+	HPWidget->SetWidgetSpace(EWidgetSpace::Screen);
+
+	static ConstructorHelpers::FClassFinder<UUserWidget>
+		HPWidgetClass(TEXT("WidgetBlueprint'/Game/Book/Monster/Widget/HPWidget.HPWidget_C'"));
+
+	if (HPWidgetClass.Succeeded())
+	{
+		HPWidget->SetWidgetClass(HPWidgetClass.Class);
+		HPWidget->SetDrawSize(FVector2D(125.0f, 45.0f));
+	}
+
+	HPWidget->SetVisibility(false);
+	////////////////////////////////////////////////
+
+	VisibleHPBarBox = CreateDefaultSubobject<UBoxComponent>(TEXT("HPBARVISIBLEBOX"));
+	VisibleHPBarBox->SetupAttachment(GetMesh());
+	VisibleHPBarBox->SetCollisionProfileName(TEXT("VisibleHPBar"));
+	VisibleHPBarBox->SetBoxExtent(FVector(300.0f, 300.0f, 100.0f));
+	VisibleHPBarBox->OnComponentBeginOverlap.AddDynamic(this, &AWMonster::OnVisibleHPBarBoxBeginOverlap);
+	VisibleHPBarBox->OnComponentEndOverlap.AddDynamic(this, &AWMonster::OnVisibleHPBarBoxEndOverlap);
+
 	DeadTimer = 3.0f;
+	//HPBarVisibleTimer = 3.0f;
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +70,12 @@ void AWMonster::BeginPlay()
 
 	WAIController = Cast<AWAIController>(GetController());
 	WAIController->RunAI();
+
+	UWMonsterHPWidget* WMonsterHPWidget = Cast<UWMonsterHPWidget>(HPWidget->GetUserWidgetObject());
+	if (nullptr != WMonsterHPWidget)
+	{
+		WMonsterHPWidget->BindMonsterState(CurrentStat);
+	}
 
 	WRPGCHECK(AttackRange > 0.0f);
 	WRPGCHECK(MonsterName != NAME_None);
@@ -57,8 +92,6 @@ void AWMonster::PostInitializeComponents()
 	WAnimInstance->OnMontageEnded.AddDynamic(this, &AWMonster::OnTakaHitMontageEnded);
 	WAnimInstance->OnHitAttack.AddUObject(this, &AWMonster::AttackCheck);
 	CurrentStat->OnHPIsZero.AddUObject(this, &AWMonster::Dead);
-
-	
 }
 
 float AWMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -120,6 +153,23 @@ void AWMonster::OnTakaHitMontageEnded(UAnimMontage * AnimMontage, bool Interrupt
 
 	WAIController->RunAI();
 }
+
+void AWMonster::OnVisibleHPBarBoxBeginOverlap(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		HPWidget->SetVisibility(true);
+	}
+}
+
+void AWMonster::OnVisibleHPBarBoxEndOverlap(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		HPWidget->SetVisibility(false);
+	}
+}
+
 
 void AWMonster::PlayParticle(UParticleSystem * ParticleSystem)
 {

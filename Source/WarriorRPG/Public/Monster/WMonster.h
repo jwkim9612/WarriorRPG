@@ -37,6 +37,12 @@ private:
 	UFUNCTION()
 	void OnTakaHitMontageEnded(UAnimMontage* AnimMontage, bool Interrupted);
 
+	UFUNCTION()
+	void OnVisibleHPBarBoxBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnVisibleHPBarBoxEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UPROPERTY()
 	class UWMonsterAnimInstance *WAnimInstance;
 
@@ -45,6 +51,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Stat")
 	class UWMonsterStatComponent* CurrentStat;
+
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	class UWidgetComponent* HPWidget;
+
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	class UBoxComponent* VisibleHPBarBox;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
 	UParticleSystem* HitParticle;

@@ -7,6 +7,7 @@
 #include "WMonsterStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnHPIsZeroDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnHPChangedDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class WARRIORRPG_API UWMonsterStatComponent : public UActorComponent
@@ -39,8 +40,10 @@ public:
 	void SetHP(float NewHP);
 	void SetHPToDamage(float Damage);
 	float GetHP() const;
+	float GetHPRatio() const;
 	int32 GetAttack() const;
 	float GetDropExp() const;
 
 	FOnHPIsZeroDelegate OnHPIsZero;
+	FOnHPChangedDelegate OnHPChanged;
 };

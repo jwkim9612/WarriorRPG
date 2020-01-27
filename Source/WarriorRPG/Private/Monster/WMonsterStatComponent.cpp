@@ -23,7 +23,7 @@ void UWMonsterStatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+
 }
 
 
@@ -60,6 +60,7 @@ void UWMonsterStatComponent::SetHP(float NewHP)
 {
 	WRPGCHECK(CurrentStat != nullptr);
 	CurrentHP = NewHP;
+	OnHPChanged.Broadcast();
 
 	if (CurrentHP <= 0.0f)
 	{
@@ -76,6 +77,11 @@ void UWMonsterStatComponent::SetHPToDamage(float Damage)
 float UWMonsterStatComponent::GetHP() const
 {
 	return CurrentHP;
+}
+
+float UWMonsterStatComponent::GetHPRatio() const
+{
+	return CurrentHP / CurrentStat->MaxHP;
 }
 
 int32 UWMonsterStatComponent::GetAttack() const
