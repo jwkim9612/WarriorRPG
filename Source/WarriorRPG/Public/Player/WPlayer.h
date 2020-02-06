@@ -76,6 +76,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
 	UParticleSystem* HitParticle;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
+	UParticleSystem* LevelUpParticle;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Audio", Meta = (AllowPrivateAccess = true))
 	class USoundCue* JumpSoundCue;
 
@@ -93,6 +96,7 @@ private:
 	float ArmLengthSpeed;
 
 	bool bFocus;
+	bool IsRun;
 	bool IsEmoting;
 	bool IsAttacking;
 	bool OnComboInput;

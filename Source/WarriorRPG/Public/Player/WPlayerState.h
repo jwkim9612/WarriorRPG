@@ -9,6 +9,7 @@
 DECLARE_MULTICAST_DELEGATE(FOnHPChangedDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnMPChangedDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnExpChangedDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnLevelUpDelegate);
 
 // PlayerState 는 네트워크 게임에서 매우 유용한 클래스이다. 
 // 이름에서 그 용도를 짐작할 수 있듯이 게임 플레이어의 모든 상태를 저장하고 다른 클라이언트에게 까지 전달할 수 있는 특징을 가지고 있다
@@ -54,6 +55,8 @@ public:
 	void SetPlayerLevel(int32 NewLevel);
 	void SetHP(float NewHP);
 	void SetHPToDamage(float Damage);
+	void SetMP(float NewMP);
+	void SetMPToSkill(float Mana);
 	void AddExp(float IncomeExp);
 	bool IsMaxLevel() const;
 	float GetLevel() const;
@@ -67,4 +70,5 @@ public:
 	FOnHPChangedDelegate OnHPChanged;
 	FOnMPChangedDelegate OnMPChanged;
 	FOnExpChangedDelegate OnExpChanged;
+	FOnLevelUpDelegate OnLevelUp;
 };

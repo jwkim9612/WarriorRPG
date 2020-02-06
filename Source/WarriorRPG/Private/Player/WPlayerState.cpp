@@ -30,10 +30,8 @@ void AWPlayerState::SetPlayerLevel(int32 NewLevel)
 	if (CurrentState != nullptr)
 	{
 		Level = CurrentState->Level;
-		CurrentHP = CurrentState->MaxHP;
-		CurrentMP = CurrentState->MaxMP;
-		OnHPChanged.Broadcast();
-		OnMPChanged.Broadcast();
+		SetHP(CurrentState->MaxHP);
+		SetMP(CurrentState->MaxMP);
 	}
 }
 
@@ -49,6 +47,18 @@ void AWPlayerState::SetHPToDamage(float Damage)
 	SetHP(FMath::Clamp(CurrentHP - Damage, 0.0f, CurrentState->MaxHP));
 }
 
+void AWPlayerState::SetMP(float NewMP)
+{
+	CurrentMP = NewMP;
+	OnMPChanged.Broadcast();
+}
+
+void AWPlayerState::SetMPToSkill(float Mana)
+{
+	WRPGCHECK(CurrentState != nullptr);
+	SetMP(FMath::Clamp(CurrentMP - Mana, 0.0f, CurrentState->MaxMP));
+}
+
 void AWPlayerState::AddExp(float IncomeExp)
 {
 	WRPGCHECK(IncomeExp > 0);
@@ -62,6 +72,7 @@ void AWPlayerState::AddExp(float IncomeExp)
 	{
 		Exp = Exp - CurrentState->NextExp;
 		SetPlayerLevel(Level + 1);
+		OnLevelUp.Broadcast();
 		WRPGLOG(Warning, TEXT("Level Up : %d"), Level);
 
 		if (IsMaxLevel())

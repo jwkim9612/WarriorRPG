@@ -24,6 +24,14 @@ AWPlayer::AWPlayer()
 	SpringArm->SetupAttachment(RootComponent);
 	Camera->SetupAttachment(SpringArm);
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		LevelUpParticle_Object(TEXT("ParticleSystem'/Game/Book/Player/Particle/P_Whirlwind_Default_Start_01.P_Whirlwind_Default_Start_01'"));
+
+	if (LevelUpParticle_Object.Succeeded())
+	{
+		LevelUpParticle = LevelUpParticle_Object.Object;
+	}
+
 	IsAttacking = false;
 	EndComboState();
 
@@ -32,6 +40,8 @@ AWPlayer::AWPlayer()
 
 	ArmLengthSpeed = 1.0f;
 	PressKey = Pressed::Press_None;
+
+	IsRun = false;
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +54,10 @@ void AWPlayer::BeginPlay()
 	WPlayerState = Cast<AWPlayerState>(GetController()->PlayerState);
 	WRPGCHECK(WPlayerState != nullptr);
 	WPlayerState->SetPlayerLevel(1);
+	WPlayerState->OnLevelUp.AddLambda([this]() -> void {
+
+		PlayParticle(LevelUpParticle);
+	});
 }
 
 // Called every frame
@@ -75,6 +89,13 @@ void AWPlayer::Tick(float DeltaTime)
 			break;
 		}
 	}
+
+
+	// 후에 바꿔야함.
+	if (IsRun && GetCharacterMovement()->Velocity.Size() > 0.0f && !GetCharacterMovement()->IsFalling())
+	{
+		WPlayerState->SetMPToSkill(DeltaTime);
+	}
 }
 
 void AWPlayer::PostInitializeComponents()
@@ -99,6 +120,7 @@ void AWPlayer::PostInitializeComponents()
 	});
 
 	AnimInstance->OnHitAttack.AddUObject(this, &AWPlayer::AttackCheck);
+
 }
 
 float AWPlayer::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
@@ -107,7 +129,6 @@ float AWPlayer::TakeDamage(float Damage, FDamageEvent const & DamageEvent, ACont
 
 	PlayParticle(HitParticle);
 	WPlayerState->SetHPToDamage(Damage);
-
 
 	return FinalDamage;
 }
@@ -367,12 +388,20 @@ void AWPlayer::OffFocus()
 
 void AWPlayer::OnRun()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 900.0f;
+	if (!IsRun)
+	{
+		IsRun = true;
+		GetCharacterMovement()->MaxWalkSpeed = 900.0f;
+	}
 }
 
 void AWPlayer::OffRun()
 {
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	if (IsRun)
+	{
+		IsRun = false;
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
 }
 
 void AWPlayer::SetAttackMode(AttackMode NewAttackMode)
