@@ -24,6 +24,8 @@ protected:
 public:
 	void MonsterKill(class AWMonster* KilledMonster);
 
+	class UWPlayerHUDWidget* GetPlayerHUDWidget() const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class UWPlayerHUDWidget> WPlayerHUDWidgetClass;

@@ -97,8 +97,6 @@ void AWMonster::PostInitializeComponents()
 float AWMonster::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
 	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-	PlayParticle(HitParticle);
 	
 	WAIController->StopAI();
 	WAnimInstance->PlayTakeHitMontage();
@@ -168,12 +166,6 @@ void AWMonster::OnVisibleHPBarBoxEndOverlap(UPrimitiveComponent * OverlappedComp
 	{
 		HPWidget->SetVisibility(false);
 	}
-}
-
-
-void AWMonster::PlayParticle(UParticleSystem * ParticleSystem)
-{
-	UGameplayStatics::SpawnEmitterAttached(ParticleSystem, RootComponent, NAME_None);
 }
 
 void AWMonster::Attack()

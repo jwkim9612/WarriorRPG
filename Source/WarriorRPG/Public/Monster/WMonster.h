@@ -58,9 +58,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "UI")
 	class UBoxComponent* VisibleHPBarBox;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
-	UParticleSystem* HitParticle;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Attack", Meta = (AllowPrivateAccess = true))
 	float AttackRange;
 
@@ -68,8 +65,6 @@ private:
 	FName MonsterName;
 
 	bool IsAttacking = false;
-
-	void PlayParticle(UParticleSystem* ParticleSystem);
 	
 	FTimerHandle DeadTimerHandle;
 	float DeadTimer;

@@ -5,7 +5,8 @@
 #include "WPlayerAnimInstance.h"
 #include "WPlayerController.h"
 #include "WPlayerState.h"
-#include "Sound/SoundCue.h"
+#include "WPlayerHUDWidget.h"
+#include "WQuickSlots.h"
 
 // Sets default values
 AWPlayer::AWPlayer()
@@ -42,6 +43,8 @@ AWPlayer::AWPlayer()
 	PressKey = Pressed::Press_None;
 
 	IsRun = false;
+
+	InitQuick();
 }
 
 // Called when the game starts or when spawned
@@ -58,6 +61,20 @@ void AWPlayer::BeginPlay()
 
 		PlayParticle(LevelUpParticle);
 	});
+
+	WPlayerController = Cast<AWPlayerController>(GetController());
+	WRPGCHECK(WPlayerController != nullptr);
+
+	if (WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget)
+	{
+		WRPGLOG(Warning, TEXT(" y"));
+		WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget->Player = this;
+		WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget->Init();
+	}
+	else
+	{
+		WRPGLOG(Warning, TEXT(" n"));
+	}
 }
 
 // Called every frame
@@ -102,24 +119,21 @@ void AWPlayer::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	AnimInstance = Cast<UWPlayerAnimInstance>(GetMesh()->GetAnimInstance());
-	WRPGCHECK(AnimInstance != nullptr);
+	WAnimInstance = Cast<UWPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	WRPGCHECK(WAnimInstance != nullptr);
 
-	AnimInstance->OnMontageEnded.AddDynamic(this, &AWPlayer::OnAttackMontageEnded);
-	AnimInstance->OnCanNextAttack.AddLambda([this]() -> void {
+	WAnimInstance->OnMontageEnded.AddDynamic(this, &AWPlayer::OnAttackMontageEnded);
+	WAnimInstance->OnCanNextAttack.AddLambda([this]() -> void {
 
 		if (OnComboInput)
 		{
 			OnComboInput = false;
 			StartComboState();
-			AnimInstance->JumpToNextAttackSection(CurrentCombo);
-			
-			WRPGCHECK(AttackSoundCue != nullptr);
-			PlaySound(AttackSoundCue);
+			WAnimInstance->JumpToNextAttackSection(CurrentCombo);
 		}
 	});
 
-	AnimInstance->OnHitAttack.AddUObject(this, &AWPlayer::AttackCheck);
+	WAnimInstance->OnHitAttack.AddUObject(this, &AWPlayer::AttackCheck);
 
 }
 
@@ -151,9 +165,10 @@ void AWPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAction("Emote1", EInputEvent::IE_Pressed, this, &AWPlayer::OnEmote1);
 	PlayerInputComponent->BindAction("Emote2", EInputEvent::IE_Pressed, this, &AWPlayer::OnEmote2);
 	PlayerInputComponent->BindAction("Emote3", EInputEvent::IE_Pressed, this, &AWPlayer::OnEmote3);
-	PlayerInputComponent->BindAction("Skill", EInputEvent::IE_Pressed, this, &AWPlayer::Skill);
+	//PlayerInputComponent->BindAction("Skill", EInputEvent::IE_Pressed, this, &AWPlayer::Skill);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &AWPlayer::OnRun);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &AWPlayer::OffRun);
+	PlayerInputComponent->BindAction<QuickDelegate, AWPlayer, int>("Quick_1", EInputEvent::IE_Released, this, &AWPlayer::UseQuick, 1);
 }
 
 void AWPlayer::UpDown(float NewAxisValue)
@@ -234,6 +249,7 @@ void AWPlayer::LookUp(float NewAxisValue)
 	}
 }
 
+
 void AWPlayer::Jump()
 {
 	if (IsAttacking || GetMovementComponent()->IsFalling())
@@ -243,9 +259,6 @@ void AWPlayer::Jump()
 	else
 	{
 		Super::Jump();
-
-		WRPGCHECK(JumpSoundCue != nullptr);
-		PlaySound(JumpSoundCue);
 	}
 }
 
@@ -287,21 +300,17 @@ void AWPlayer::Attack()
 
 	if (!IsAttacking)
 	{
+		CurrentAttackType = AttackType::Default;
 		IsAttacking = true;
 
 		if (GetMovementComponent()->IsFalling())
 		{
-			AnimInstance->PlayAirAttackMontage();
-			WRPGCHECK(AttackSoundCue != nullptr);
-			PlaySound(AttackSoundCue);
+			WAnimInstance->PlayAirAttackMontage();
 			return;
 		}
 
 		StartComboState();
-		AnimInstance->PlayGroundAttackMontage();
-
-		WRPGCHECK(AttackSoundCue != nullptr);
-		PlaySound(AttackSoundCue);
+		WAnimInstance->PlayGroundAttackMontage();
 	}
 	else
 	{
@@ -317,13 +326,32 @@ void AWPlayer::AttackCheck()
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Param(NAME_None, false, this);
 
+	float CapsuleRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+	float HitRange = 0.0f;
+	float HitDamage = 0.0f;
+	float HitScale = 0.0f;
+
+	switch (CurrentAttackType)
+	{
+	case AttackType::Default:
+		HitRange = 100.0f;
+		HitDamage = WPlayerState->GetAttack();
+		HitScale = 70.0f;
+		break;
+	case AttackType::Skill:
+		HitRange = WSkillData[0].Range;
+		HitDamage = WSkillData[0].Attack;
+		HitScale = WSkillData[0].Scale;
+		break;
+	}
+
 	bool bResult = GetWorld()->SweepMultiByChannel(
 		HitResults,
-		GetActorLocation() + GetActorForwardVector() * 68.0f,
-		GetActorLocation() + GetActorForwardVector() * 100.0f,
+		GetActorLocation() + GetActorForwardVector() * CapsuleRadius * 2,
+		GetActorLocation() + GetActorForwardVector() * HitRange,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel3,
-		FCollisionShape::MakeSphere(70.0f),
+		FCollisionShape::MakeSphere(HitScale),
 		Param
 	);
 
@@ -331,8 +359,9 @@ void AWPlayer::AttackCheck()
 	{
 		for (auto& HitResult : HitResults)
 		{
+			WRPGLOG(Warning, TEXT("Hit"));
 			FDamageEvent DamageEvent;
-			HitResult.Actor->TakeDamage(WPlayerState->GetAttack() , DamageEvent, GetController(), this);
+			HitResult.Actor->TakeDamage(HitDamage , DamageEvent, GetController(), this);
 		}
 	}
 
@@ -352,16 +381,21 @@ void AWPlayer::EndComboState()
 	CurrentCombo = 0;
 }
 
-void AWPlayer::Skill()
+void AWPlayer::Skill(int32 Index)
 {
 	if (!IsAttacking)
 	{
 		IsAttacking = true;
-		AnimInstance->PlaySkillMontage();
-
-		WRPGCHECK(SkillSoundCue != nullptr);
-		PlaySound(SkillSoundCue);
+		CurrentAttackType = AttackType::Skill;
+		//WPlayerState->SetMPToSkill(5);
+		//AnimInstance->PlaySkillMontage();
+		WSkillData[Index].Use(this);
 	}
+}
+
+void AWPlayer::UseQuick(int32 index)
+{
+	// Quick[index].Action;
 }
 
 void AWPlayer::OnFocus()
@@ -481,7 +515,7 @@ void AWPlayer::StartEmote(int32 EmoteNum)
 		return;
 	}
 
-	AnimInstance->PlayEmote(EmoteNum);
+	WAnimInstance->PlayEmote(EmoteNum);
 	IsEmoting = true;
 }
 
@@ -489,13 +523,13 @@ void AWPlayer::StopEmote()
 {
 	WRPGCHECK(IsEmoting);
 
-	AnimInstance->StopMontage();
+	WAnimInstance->StopMontage();
 	IsEmoting = false;
 }
 
-void AWPlayer::PlaySound(USoundCue * SoundToPlay)
+void AWPlayer::InitQuick()
 {
-	UGameplayStatics::SpawnSoundAttached(SoundToPlay, RootComponent, NAME_None, FVector::ZeroVector, EAttachLocation::SnapToTarget, true);
+	QuickDatas.Init(FSlotData(), 8);
 }
 
 void AWPlayer::OnAttackMontageEnded(UAnimMontage * AnimMontage, bool Interrupted)
@@ -517,4 +551,14 @@ Pressed AWPlayer::GetPressedValue() const
 bool AWPlayer::IsFocusing() const
 {
 	return bFocus;
+}
+
+UWPlayerAnimInstance * AWPlayer::GetAnimInstance() const
+{
+	return WAnimInstance;
+}
+
+AWPlayerState * AWPlayer::GetPlayerState() const
+{
+	return WPlayerState;
 }

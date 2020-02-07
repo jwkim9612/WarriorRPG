@@ -4,6 +4,7 @@
 
 #include "WarriorRPG.h"
 #include "GameFramework/Character.h"
+#include "WGameData.h"
 #include "WPlayer.generated.h"
 
 UCLASS()
@@ -28,6 +29,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TArray<FSlotData> QuickDatas;
+
 private:
 	void UpDown(float NewAxisValue);
 	void LeftRight(float NewAxisValue);
@@ -41,7 +46,11 @@ private:
 	void AttackCheck();
 	void StartComboState();
 	void EndComboState();
-	void Skill();
+
+	DECLARE_DELEGATE_OneParam(QuickDelegate, int);
+	void Skill(int32 Index);
+	void UseQuick(int32 index);
+
 	void OnFocus();
 	void OffFocus();
 	void OnRun();
@@ -54,7 +63,8 @@ private:
 	void OnEmote3();
 	void StartEmote(int32 EmoteNum);
 	void StopEmote();
-	void PlaySound(class USoundCue* SoundToPlay);
+
+	void InitQuick();
 	
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool Interrupted);
@@ -62,6 +72,9 @@ private:
 public:
 	Pressed GetPressedValue() const;
 	bool IsFocusing() const;
+
+	class UWPlayerAnimInstance* GetAnimInstance() const;
+	class AWPlayerState* GetPlayerState() const;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", Meta = (AllowPrivateAccess = true))
@@ -71,22 +84,16 @@ private:
 	UCameraComponent* Camera;
 
 	UPROPERTY()
-	class UWPlayerAnimInstance *AnimInstance;
+	class UWPlayerAnimInstance *WAnimInstance;
+
+	UPROPERTY()
+	class AWPlayerController *WPlayerController;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
 	UParticleSystem* HitParticle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Hit", Meta = (AllowPrivateAccess = true))
 	UParticleSystem* LevelUpParticle;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Audio", Meta = (AllowPrivateAccess = true))
-	class USoundCue* JumpSoundCue;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Audio", Meta = (AllowPrivateAccess = true))
-	class USoundCue* AttackSoundCue;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Audio", Meta = (AllowPrivateAccess = true))
-	class USoundCue* SkillSoundCue;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Combo", Meta = (AllowPrivateAccess = true))
 	int32 MaxCombo;
@@ -104,9 +111,13 @@ private:
 	int32 CurrentCombo;
 
 	Pressed PressKey;
-	AttackMode CurrentAttackmode;
+	AttackMode CurrentAttackmode = AttackMode::Default;
+	AttackType CurrentAttackType = AttackType::Default;
 	FRotator FocusingRotation = FRotator(-30.0f, 0.0f, 0.0f);
 
 	UPROPERTY()
 	class AWPlayerState* WPlayerState;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SKill", Meta = (AllowPrivateAccess = true))
+	TArray<struct FWSkillData> WSkillData;
 };

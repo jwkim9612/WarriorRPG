@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (BindWidget))
 	class UWPlayerExpWidget* WPlayerExpWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (BindWidget))
+	class UWQuickSlots* WQuickSlotsWidget;
+
 public:
 	void BindPlayerState(class AWPlayerState* PlayerState);
 

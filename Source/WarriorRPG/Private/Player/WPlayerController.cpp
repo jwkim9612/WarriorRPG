@@ -42,3 +42,8 @@ void AWPlayerController::MonsterKill(AWMonster * KilledMonster)
 {
 	WPlayerState->AddExp(KilledMonster->GetCurrentStat()->GetDropExp());
 }
+
+UWPlayerHUDWidget * AWPlayerController::GetPlayerHUDWidget() const
+{
+	return WPlayerHUDWidget;
+}

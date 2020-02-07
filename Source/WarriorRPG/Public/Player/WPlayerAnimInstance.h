@@ -7,6 +7,7 @@ DECLARE_MULTICAST_DELEGATE(FOnHitAttackDelegate);
 
 #include "WarriorRPG.h"
 #include "Animation/AnimInstance.h"
+#include "WGameData.h"
 #include "WPlayerAnimInstance.generated.h"
 
 /**
