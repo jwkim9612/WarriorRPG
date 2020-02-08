@@ -29,10 +29,6 @@ void UWQuickSlots::Init()
 	// 예비변수
 	int ForSlotNum = 0;
 
-	// ******** Slot을 QuickSlot으로 바꿀것 QuickSlot 클래스도 하나 만들것.
-
-	WRPGLOG(Warning, TEXT("Init"));
-
 	UWSlot* slot = nullptr;
 	for (auto widget : widgets)
 	{
@@ -40,7 +36,6 @@ void UWQuickSlots::Init()
 
 
 		if (!slot) continue;
-		WRPGLOG(Warning, TEXT("widgets for"));
 		slot->Player = this->Player;
 		slot->SetType(ESlotType::SLOT_Quick);
 		slot->Slotnum = ForSlotNum;

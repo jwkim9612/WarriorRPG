@@ -38,8 +38,6 @@ void UWSlot::Refresh()
 	{
 		FSlotData& data = Player->QuickDatas[Slotnum];
 
-		WRPGLOG(Warning, TEXT("Refresh"));
-
 		if (data.Texture != nullptr)
 			SetTexture(data.Texture);
 
@@ -52,6 +50,15 @@ void UWSlot::Refresh()
 			Text->SetVisibility(ESlateVisibility::Visible);
 			Text->SetText(FText::FromString(FString::FromInt(Count)));
 		}
+		break;
+	}
+	case ESlotType::SLOT_Skill:
+	{
+		FWSkillData& SkillData = Player->WSkillData[Slotnum];
+
+		if (SkillData.Textrue != nullptr)
+			SetTexture(SkillData.Textrue);
+
 		break;
 	}
 	}

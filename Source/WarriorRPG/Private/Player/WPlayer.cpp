@@ -7,6 +7,7 @@
 #include "WPlayerState.h"
 #include "WPlayerHUDWidget.h"
 #include "WQuickSlots.h"
+#include "WSkillTree.h"
 
 // Sets default values
 AWPlayer::AWPlayer()
@@ -67,13 +68,14 @@ void AWPlayer::BeginPlay()
 
 	if (WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget)
 	{
-		WRPGLOG(Warning, TEXT(" y"));
 		WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget->Player = this;
 		WPlayerController->GetPlayerHUDWidget()->WQuickSlotsWidget->Init();
 	}
-	else
+
+	if (WPlayerController->GetSkillTreeWidget())
 	{
-		WRPGLOG(Warning, TEXT(" n"));
+		WPlayerController->GetSkillTreeWidget()->Player = this;
+		WPlayerController->GetSkillTreeWidget()->Init();
 	}
 }
 
@@ -168,7 +170,8 @@ void AWPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//PlayerInputComponent->BindAction("Skill", EInputEvent::IE_Pressed, this, &AWPlayer::Skill);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Pressed, this, &AWPlayer::OnRun);
 	PlayerInputComponent->BindAction("Run", EInputEvent::IE_Released, this, &AWPlayer::OffRun);
-	PlayerInputComponent->BindAction<QuickDelegate, AWPlayer, int>("Quick_1", EInputEvent::IE_Released, this, &AWPlayer::UseQuick, 1);
+	PlayerInputComponent->BindAction("SkillTree", EInputEvent::IE_Pressed, this, &AWPlayer::OnSkillTree);
+	//PlayerInputComponent->BindAction<QuickDelegate, AWPlayer, int>("Quick_1", EInputEvent::IE_Released, this, &AWPlayer::UseQuick, 1);
 }
 
 void AWPlayer::UpDown(float NewAxisValue)
@@ -396,6 +399,11 @@ void AWPlayer::Skill(int32 Index)
 void AWPlayer::UseQuick(int32 index)
 {
 	// Quick[index].Action;
+}
+
+void AWPlayer::OnSkillTree()
+{
+	WPlayerController->OnSkillTree();
 }
 
 void AWPlayer::OnFocus()

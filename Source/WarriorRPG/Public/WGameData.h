@@ -61,6 +61,9 @@ public:
 	FName Name;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FName Description;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UTexture2D* Textrue;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)

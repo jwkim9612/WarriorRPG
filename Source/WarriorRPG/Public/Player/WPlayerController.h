@@ -24,11 +24,17 @@ protected:
 public:
 	void MonsterKill(class AWMonster* KilledMonster);
 
+	void OnSkillTree();
+
 	class UWPlayerHUDWidget* GetPlayerHUDWidget() const;
+	class UWSkillTree* GetSkillTreeWidget() const;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<class UWPlayerHUDWidget> WPlayerHUDWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UWSkillTree> WSkillTreeWidgetClass;
 
 private:
 	UPROPERTY()
@@ -36,4 +42,7 @@ private:
 
 	UPROPERTY()
 	class UWPlayerHUDWidget* WPlayerHUDWidget;
+
+	UPROPERTY()
+	class UWSkillTree* WSkillTreeWidget;
 };

@@ -51,6 +51,7 @@ private:
 	void Skill(int32 Index);
 	void UseQuick(int32 index);
 
+	void OnSkillTree();
 	void OnFocus();
 	void OffFocus();
 	void OnRun();
@@ -75,6 +76,9 @@ public:
 
 	class UWPlayerAnimInstance* GetAnimInstance() const;
 	class AWPlayerState* GetPlayerState() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = "SKill", Meta = (AllowPrivateAccess = true))
+	TArray<struct FWSkillData> WSkillData;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera", Meta = (AllowPrivateAccess = true))
@@ -118,6 +122,5 @@ private:
 	UPROPERTY()
 	class AWPlayerState* WPlayerState;
 
-	UPROPERTY(EditDefaultsOnly, Category = "SKill", Meta = (AllowPrivateAccess = true))
-	TArray<struct FWSkillData> WSkillData;
+
 };
